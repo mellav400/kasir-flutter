@@ -87,7 +87,7 @@ class DashboardPage extends StatelessWidget {
                       child: Image.asset(
                         product['image'],
                         height: 50,
-                        width: 50,
+                        width: 51,
                         fit: BoxFit.cover,
                       ),
                     ),
