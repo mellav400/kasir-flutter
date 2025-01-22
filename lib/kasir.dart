@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kasir_mella/tambahProdukk.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -17,47 +19,9 @@ class _DashboardPageState extends State<DashboardPage> {
     "Others"
   ];
 
-  final List<Map<String, dynamic>> products = [
-    {
-      "name": "Bouquet's Korean",
-      "price": 50000,
-      "category": "Sweet",
-      "image": "assets/buketkorea.jpeg"
-    },
-    {
-      "name": "Bouquet's Spring",
-      "price": 70000,
-      "category": "Spring",
-      "image": "assets/buketspring.jpeg"
-    },
-    {
-      "name": "Bouquet's Tulips",
-      "price": 150000,
-      "category": "Wedding",
-      "image": "assets/bukettulip.jpeg"
-    },
-    {
-      "name": "Bouquet's Sweet Tulips",
-      "price": 50000,
-      "category": "Sweet",
-      "image": "assets/bukettulips.jpg"
-    },
-    {
-      "name": "Bouquet's Old",
-      "price": 50000,
-      "category": "Cold",
-      "image": "assets/springold.jpg"
-    },
-    {
-      "name": "Bouquet's Sunflower",
-      "price": 50000,
-      "category": "Custom",
-      "image": "assets/buketsunfl.jpg"
-    },
-  ];
+  List<Map<String, dynamic>> products = [];
 
   String selectedCategory = "All";
-  List<Map<String, dynamic>> cart = []; // Keranjang belanja
 
   List<Map<String, dynamic>> get filteredProducts {
     if (selectedCategory == "All") {
@@ -68,140 +32,59 @@ class _DashboardPageState extends State<DashboardPage> {
         .toList();
   }
 
-  // Fungsi untuk menambahkan produk ke keranjang
-  void _addToCart(Map<String, dynamic> product, int quantity) {
+  void initState() {
+    super.initState();
+    fetchProduk();
+  }
+    Future<void> fetchProduk() async {
+    final response = await Supabase.instance.client.from('produk').select();
     setState(() {
-      cart.add({
-        "product": product,
-        "quantity": quantity,
-        "totalPrice": product['price'] * quantity
+      products = List<Map<String, dynamic>>.from(response);
+    });
+  }
+
+
+  Future<void> addProduk(String nama_produk, String harga, String stok) async {
+    try {
+      await Supabase.instance.client.from('books').insert({
+        'nama_produk': nama_produk,
+        'harga': harga,
+        'stok': stok,
       });
+      fetchProduk();
+      Navigator.pop(context);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menambahkan buku: $error')),
+      );
+    }
+  }
+
+  // Fungsi untuk menghapus produk
+  void _deleteProduct(int index) {
+    setState(() {
+      products.removeAt(index);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${product['name']} added to cart!')),
+      SnackBar(content: Text('Product deleted')),
     );
   }
 
-  // Fungsi untuk menampilkan dialog pembelian
-  void _showPurchaseDialog(BuildContext context, Map<String, dynamic> product) {
-    int quantity = 1;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Buy ${product['name']}',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(product['image'], height: 100),
-              SizedBox(height: 10),
-              Text(
-                'Price: Rp ${product['price']}',
-                style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Text('Quantity: ', style: GoogleFonts.poppins()),
-                  IconButton(
-                    icon: Icon(Icons.remove),
-                    onPressed: () {
-                      if (quantity > 1) {
-                        setState(() {
-                          quantity--;
-                        });
-                      }
-                    },
-                  ),
-                  Text('$quantity', style: GoogleFonts.poppins()),
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: () {
-                      setState(() {
-                        quantity++;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  _addToCart(product, quantity); // Menambahkan ke keranjang
-                  Navigator.pop(context); // Menutup dialog
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 248, 137, 174),
-                ),
-                child: Text('Add to Cart'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Fungsi untuk menampilkan keranjang
-  void _showCart() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Shopping Cart',
-                style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: cart.length,
-                  itemBuilder: (context, index) {
-                    final cartItem = cart[index];
-                    final product = cartItem['product'];
-                    final quantity = cartItem['quantity'];
-                    final totalPrice = cartItem['totalPrice'];
-                    return ListTile(
-                      title: Text(product['name']),
-                      subtitle: Text('Qty: $quantity - Total: Rp $totalPrice'),
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle),
-                        onPressed: () {
-                          setState(() {
-                            cart.removeAt(index);
-                          });
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Proses checkout
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Checkout successful!')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 230, 182, 198),
-                ),
-                child: Text('Checkout'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  // Fungsi untuk mengedit produk
+  void _editProduct(int index) {
+    // Arahkan ke halaman edit (mungkin menggunakan form untuk mengedit)
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => tambahProduk(),
+      ),
+    ).then((updatedProduct) {
+      if (updatedProduct != null) {
+        setState(() {
+          products[index] = updatedProduct;
+        });
+      }
+    });
   }
 
   @override
@@ -213,49 +96,19 @@ class _DashboardPageState extends State<DashboardPage> {
           'Bouquet by Efelav',
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/admin.jpg'),
-            ),
-          ),
-        ],
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
       ),
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
-              decoration:
-                  BoxDecoration(color: Colors.pinkAccent),
+              decoration: BoxDecoration(color: Colors.pinkAccent),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/admin_profile.png'),
-                  ),
+                  CircleAvatar(radius: 30),
                   SizedBox(height: 10),
-                  Text(
-                    'Admin',
-                    style: GoogleFonts.poppins(
-                      color: Color.fromARGB(255, 219, 130, 255),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'adminook@google.com',
-                    style: GoogleFonts.poppins(color: Colors.white),
-                  ),
+                  Text('Admin',
+                      style: GoogleFonts.poppins(color: Colors.white)),
                 ],
               ),
             ),
@@ -285,12 +138,12 @@ class _DashboardPageState extends State<DashboardPage> {
             color: Colors.grey[200],
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
+              itemCount: products.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 10.0),
                   child: ChoiceChip(
                     label: Text(
                       category,
@@ -307,7 +160,6 @@ class _DashboardPageState extends State<DashboardPage> {
               },
             ),
           ),
-
           // Produk
           Expanded(
             child: GridView.builder(
@@ -318,53 +170,53 @@ class _DashboardPageState extends State<DashboardPage> {
                 mainAxisSpacing: 8.0,
                 childAspectRatio: 1,
               ),
-              itemCount: filteredProducts.length,
+              itemCount: products.length,
               itemBuilder: (context, index) {
-                final product = filteredProducts[index];
-                return GestureDetector(
-                  onTap: () {
-                    _showPurchaseDialog(context, product); // Menampilkan dialog pembelian
-                  },
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              product['image'],
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
+                final product = products[index];
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tidak ada gambar, hanya nama dan harga
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          product['nama_produk'],
+                          style: GoogleFonts.poppins(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Rp ${product['harga']}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            product['name'],
-                            style: GoogleFonts.poppins(
-                                fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8.0),
+                      // Tombol Edit dan Hapus
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () => _editProduct(index),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            'Rp ${product['price']}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () => _deleteProduct(index),
                           ),
-                        ),
-                        SizedBox(height: 8.0),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },
@@ -373,8 +225,11 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showCart, // Menampilkan keranjang
-        child: Icon(Icons.shopping_cart),
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => tambahProduk()));
+        }, // Menampilkan halaman tambah produk
+        child: Icon(Icons.add),
         backgroundColor: const Color.fromARGB(255, 248, 174, 199),
       ),
     );

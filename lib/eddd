@@ -1,0 +1,138 @@
+ @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tambah Produk', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.pinkAccent,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formkey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Nama Produk
+                Text(
+                  'Nama Produk',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _NamaProdukController,
+                  decoration: InputDecoration(
+                    labelText: 'Nama Produk',
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    prefixIcon: Icon(Icons.local_florist),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Nama produk tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+
+                // Harga Produk
+                Text(
+                  'Harga Produk',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _HargaController,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: 'Harga Produk',
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    prefixIcon: Icon(Icons.money),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Harga produk tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 16),
+
+                // Stok Produk
+                Text(
+                  'Stok Produk',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _StokController,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: 'Stok Produk',
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    prefixIcon: Icon(Icons.storage),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Stok produk tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 16),
+
+                // Kategori Produk
+                Text(
+                  'Kategori Produk',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _KategoriController,
+                  decoration: InputDecoration(
+                    labelText: 'Kategori Produk',
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Kategori produk tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 20),
+
+                // Tombol Simpan
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _tambahProduk,
+                    child: Text(
+                      'Simpan',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.pinkAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),

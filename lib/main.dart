@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kasir_mella/kasir.dart';
+import 'package:kasir_mella/tambahProdukk.dart';
 import 'package:kasir_mella/registration.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'Loginscreen.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Screen(),
+      home: DashboardPage(),
     );
   }
 }

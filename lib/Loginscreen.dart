@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'kasir.dart';
+import 'tambahProdukk.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (username == 'Administrator' && password == 'Admin123') {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => DashboardPage()));
+          context, MaterialPageRoute(builder: (context) => tambahProduk()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
