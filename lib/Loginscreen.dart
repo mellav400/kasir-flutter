@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kasir_mella/kasir.dart';
 import 'tambahProdukk.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,9 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
     String username = _usernameController.text;
     String password = _passwordController.text;
 
-    if (username == 'Administrator' && password == 'Admin123') {
+    if (username == 'Administrator' && password == 'admin123') {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => tambahProduk()));
+          context, MaterialPageRoute(builder: (context) => DashboardPage()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -67,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  _buildTextField(Icons.person, 'Username'),
+                  _buildTextField(Icons.person, 'Username',_usernameController),
                   const SizedBox(height: 20),
-                  _buildTextField(Icons.lock, 'Password', obscureText: true),
+                  _buildTextField(Icons.lock, 'Password', _passwordController, obscureText: true),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -112,9 +113,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTextField(IconData icon, String labelText,
+  Widget _buildTextField(IconData icon, String labelText,controller,
       {bool obscureText = false}) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: const Color.fromARGB(255, 51, 2, 44)),

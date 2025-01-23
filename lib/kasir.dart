@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'pelanggan.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kasir_mella/pelanggan.dart';
 import 'package:kasir_mella/tambahProdukk.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'editproduk.dart';
+import 'penjualan.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -20,7 +24,7 @@ class _DashboardPageState extends State<DashboardPage> {
   ];
 
   List<Map<String, dynamic>> products = [];
-
+  List<Map<String, dynamic>> cart = [];
   String selectedCategory = "All";
 
   List<Map<String, dynamic>> get filteredProducts {
@@ -36,43 +40,71 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     fetchProduk();
   }
-    Future<void> fetchProduk() async {
+
+  Future<void> fetchProduk() async {
     final response = await Supabase.instance.client.from('produk').select();
     setState(() {
       products = List<Map<String, dynamic>>.from(response);
     });
   }
 
-
-  Future<void> addProduk(String nama_produk, String harga, String stok) async {
-    try {
-      await Supabase.instance.client.from('books').insert({
-        'nama_produk': nama_produk,
-        'harga': harga,
-        'stok': stok,
-      });
-      fetchProduk();
-      Navigator.pop(context);
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menambahkan buku: $error')),
-      );
-    }
-  }
-
-  // Fungsi untuk menghapus produk
-  void _deleteProduct(int index) {
+  void _addToCart(Map<String, dynamic> product) {
     setState(() {
-      products.removeAt(index);
+      cart.add(product);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Product deleted')),
+      SnackBar(content: Text('Produk ${product['nama_produk']} ditambahkan ke keranjang')),
     );
   }
 
-  // Fungsi untuk mengedit produk
+  void _deleteProduct(int index) async {
+    final product = products[index];
+
+    bool? confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Hapus Produk'),
+          content: Text('Apakah Anda yakin ingin menghapus produk "${product['nama_produk']}"?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      try {
+        await Supabase.instance.client
+            .from('produk')
+            .delete()
+            .eq('id', product['id']);
+        setState(() {
+          products.removeAt(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Produk berhasil dihapus')),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menghapus produk: $error')),
+        );
+      }
+    }
+  }
+
   void _editProduct(int index) {
-    // Arahkan ke halaman edit (mungkin menggunakan form untuk mengedit)
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -87,21 +119,39 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  void _goToCart() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutPage(cart: cart),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 245, 115, 158),
         title: Text(
-          'Bouquet by Efelav',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          'Llav Florist',
+          style: GoogleFonts.domine(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: _goToCart,
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.pinkAccent),
+              decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 249, 144, 179)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -118,8 +168,26 @@ class _DashboardPageState extends State<DashboardPage> {
               onTap: () {},
             ),
             ListTile(
+              leading: Icon(Icons.filter_vintage),
+              title: Text('Produk', style: GoogleFonts.poppins()),
+              onTap: () {},
+            ),
+        ListTile(
+  leading: Icon(Icons.person),
+  title: Text('Pelanggan', style: GoogleFonts.poppins()),
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Pelanggan()),
+    );
+  },
+        ),
+
+            
+          
+            ListTile(
               leading: Icon(Icons.settings),
-              title: Text('Settings', style: GoogleFonts.poppins()),
+              title: Text('Pengaturan', style: GoogleFonts.poppins()),
               onTap: () {},
             ),
             ListTile(
@@ -132,7 +200,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          // Kategori
           Container(
             height: 60,
             color: Colors.grey[200],
@@ -160,58 +227,66 @@ class _DashboardPageState extends State<DashboardPage> {
               },
             ),
           ),
-          // Produk
           Expanded(
-            child: GridView.builder(
+            child: ListView.builder(
               padding: EdgeInsets.all(8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 1,
-              ),
               itemCount: products.length,
               itemBuilder: (context, index) {
                 final product = products[index];
                 return Card(
+                  color: Color.fromARGB(255, 254, 231, 255),
                   elevation: 4,
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tidak ada gambar, hanya nama dan harga
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          product['nama_produk'],
-                          style: GoogleFonts.poppins(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
+                      Text(
+                        product['nama_produk'],
+                        style: GoogleFonts.poppins(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          'Rp ${product['harga']}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
+                      SizedBox(
+                        height: 4.0,
+                      ),
+                      Text(
+                        'Rp ${product['harga']}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
                         ),
                       ),
                       SizedBox(height: 8.0),
-                      // Tombol Edit dan Hapus
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () => _editProduct(index),
+                            icon: Icon(
+                              Icons.add_shopping_cart,
+                              color: Colors.green,
+                            ),
+                            onPressed: () => _addToCart(product),
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: Icon(
+                              Icons.edit,
+                              color: Colors.blue,
+                            ),
+                            onPressed: () async {
+                              var hasil = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditProduk(data: product)));
+                              if (hasil == 'success'){
+                                fetchProduk();
+                              };
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            ),
                             onPressed: () => _deleteProduct(index),
                           ),
                         ],
@@ -225,13 +300,17 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          var hasil = await Navigator.push(
               context, MaterialPageRoute(builder: (context) => tambahProduk()));
-        }, // Menampilkan halaman tambah produk
+          if (hasil == 'success') {
+            fetchProduk();
+          }
+        },
         child: Icon(Icons.add),
         backgroundColor: const Color.fromARGB(255, 248, 174, 199),
       ),
     );
   }
 }
+

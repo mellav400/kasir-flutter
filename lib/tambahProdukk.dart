@@ -1,3 +1,4 @@
+import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +16,7 @@ class _tambahProdukState extends State<tambahProduk> {
   final TextEditingController _NamaProdukController = TextEditingController();
   final TextEditingController _HargaController = TextEditingController();
   final TextEditingController _StokController = TextEditingController();
-  final TextEditingController _KategoriController = TextEditingController();
+  final  _KategoriController = SingleValueDropDownController();
 
   Future<void> _tambahProduk() async {
     if (!_formkey.currentState!.validate()) {
@@ -25,7 +26,7 @@ class _tambahProdukState extends State<tambahProduk> {
     final produk = _NamaProdukController.text;
     final harga = _HargaController.text;
     final stok = _StokController.text;
-    final kategori = _KategoriController.text;
+    final kategori = _KategoriController.dropDownValue!.value;
 
     final response = await Supabase.instance.client.from('produk').insert([
       {
@@ -48,7 +49,9 @@ class _tambahProdukState extends State<tambahProduk> {
       _NamaProdukController.clear();
       _HargaController.clear();
       _StokController.clear();
-      _KategoriController.clear();
+      _KategoriController.dropDownValue = null;
+
+      Navigator.pop(context, 'success');
     }
   }
 
@@ -152,9 +155,9 @@ class _tambahProdukState extends State<tambahProduk> {
                   style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color:Color.fromARGB(255, 53, 31, 39)),
                 ),
                 SizedBox(height: 8),
-                TextFormField(
+                DropDownTextField(
                   controller: _KategoriController,
-                  decoration: InputDecoration(
+                  textFieldDecoration: InputDecoration(
                     labelText: 'Kategori Produk',
                     labelStyle: GoogleFonts.poppins(fontSize: 14),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -162,6 +165,32 @@ class _tambahProdukState extends State<tambahProduk> {
                     fillColor: Colors.grey[200],
                     prefixIcon: Icon(Icons.category, color: Color.fromARGB(255, 163, 142, 255)),
                   ),
+                  dropDownList: [
+                    DropDownValueModel(
+                      name: 'Spring', 
+                      value: 'Spring'
+                    ),
+                    DropDownValueModel(
+                      name: 'Sweet', 
+                      value: 'Sweet'
+                    ),
+                    DropDownValueModel(
+                      name: 'Cold', 
+                      value: 'Cold'
+                    ),
+                    DropDownValueModel(
+                      name: 'Wedding', 
+                      value: 'Wedding'
+                    ),
+                    DropDownValueModel(
+                      name: 'Custom', 
+                      value: 'Custom'
+                    ),
+                    DropDownValueModel(
+                      name: 'Others', 
+                      value: 'Others'
+                    )
+                  ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Kategori produk tidak boleh kosong';
