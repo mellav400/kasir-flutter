@@ -24,7 +24,7 @@ class _DashboardPageState extends State<DashboardPage> {
   ];
 
   List<Map<String, dynamic>> products = [];
-  List<Map<String, dynamic>> cart = [];
+  // List<Map<String, dynamic>> cart = [];
   String selectedCategory = "All";
 
   List<Map<String, dynamic>> get filteredProducts {
@@ -48,14 +48,16 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  void _addToCart(Map<String, dynamic> product) {
-    setState(() {
-      cart.add(product);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Produk ${product['nama_produk']} ditambahkan ke keranjang')),
-    );
-  }
+  // void _addToCart(Map<String, dynamic> product) {
+  //   setState(() {
+  //     cart.add(product);
+  //   });
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //         content: Text(
+  //             'Produk ${product['nama_produk']} ditambahkan ke keranjang')),
+  //   );
+  // }
 
   void _deleteProduct(int index) async {
     final product = products[index];
@@ -65,7 +67,8 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Hapus Produk'),
-          content: Text('Apakah Anda yakin ingin menghapus produk "${product['nama_produk']}"?'),
+          content: Text(
+              'Apakah Anda yakin ingin menghapus produk "${product['nama_produk']}"?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -119,14 +122,14 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  void _goToCart() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CheckoutPage(cart: cart),
-      ),
-    );
-  }
+  // void _goToCart() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => CheckoutPage(cart: cart),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -139,12 +142,12 @@ class _DashboardPageState extends State<DashboardPage> {
           style: GoogleFonts.domine(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: _goToCart,
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.shopping_cart),
+        //     onPressed: _goToCart,
+        //   ),
+        // ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -172,19 +175,20 @@ class _DashboardPageState extends State<DashboardPage> {
               title: Text('Produk', style: GoogleFonts.poppins()),
               onTap: () {},
             ),
-        ListTile(
-  leading: Icon(Icons.person),
-  title: Text('Pelanggan', style: GoogleFonts.poppins()),
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Pelanggan()),
-    );
-  },
-        ),
-
-            
-          
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('User/Member', style: GoogleFonts.poppins()),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Pelanggan()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.card_travel_sharp),
+              title: Text('Sale', style: GoogleFonts.poppins(),),
+            ),
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Pengaturan', style: GoogleFonts.poppins()),
@@ -202,7 +206,7 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Container(
             height: 60,
-            color: Colors.grey[200],
+            color: Color.fromARGB(255, 237, 212, 238),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: products.length,
@@ -263,23 +267,28 @@ class _DashboardPageState extends State<DashboardPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.add_shopping_cart,
-                              color: Colors.green,
-                            ),
-                            onPressed: () => _addToCart(product),
-                          ),
+                          // IconButton(
+                          //   icon: Icon(
+                          //     Icons.add_shopping_cart,
+                          //     color: Colors.green,
+                          //   ),
+                          //   onPressed: () => _addToCart(product),
+                          // ),
                           IconButton(
                             icon: Icon(
                               Icons.edit,
                               color: Colors.blue,
                             ),
                             onPressed: () async {
-                              var hasil = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditProduk(data: product)));
-                              if (hasil == 'success'){
+                              var hasil = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditProduk(data: product)));
+                              if (hasil == 'success') {
                                 fetchProduk();
-                              };
+                              }
+                              ;
                             },
                           ),
                           IconButton(
@@ -313,4 +322,3 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
-

@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:kasir_mella/tambahProdukk.dart';
-import 'package:kasir_mella/tambahuser.dart';
 import 'pelanggan.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kasir_mella/pelanggan.dart';
 import 'kasir.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'user.dart';
+
 // import 'editPelanggan.dart';
 
-class Pelanggan extends StatefulWidget {
+class User extends StatefulWidget {
   @override
-  _Pelanggan createState() => _Pelanggan();
+  _User createState() => _User();
 }
 
-class _Pelanggan extends State<Pelanggan> {
+class _User extends State<User> {
   List<Map<String, dynamic>> customers = [];
 
   void initState() {
     super.initState();
-    fetchPelanggan();
+    fetchUser();
   }
 
-  Future<void> fetchPelanggan() async {
-    final response = await Supabase.instance.client.from('pelanggan').select();
+  Future<void> fetchUser() async {
+    final response = await Supabase.instance.client.from('User').select();
     setState(() {
       customers = List<Map<String, dynamic>>.from(response);
     });
@@ -31,16 +29,16 @@ class _Pelanggan extends State<Pelanggan> {
 
   Future<void> addPelanggan(String nama, String noTelp, String alamat) async {
     try {
-      await Supabase.instance.client.from('pelanggan').insert({
-        'NamaPelanggan': nama,
-        'NoTelp': noTelp,
-        'Alamat': alamat,
+      await Supabase.instance.client.from('User').insert({
+        // 'Username': username,
+        // 'Password': password,
+        
       });
-      fetchPelanggan();
+      fetchUser();
       Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menambahkan pelanggan: $error')),
+        SnackBar(content: Text('Gagal menambahkan user: $error')),
       );
     }
   }
@@ -52,9 +50,8 @@ class _Pelanggan extends State<Pelanggan> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Hapus Pelanggan'),
-          content: Text(
-              'Apakah Anda yakin ingin menghapus pelanggan "${customer['NamaPelanggan']}"?'),
+          title: Text('Hapus '),
+          content: Text('Apakah Anda yakin ingin menghapus pelanggan "${customer['NamaPelanggan']}"?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -76,9 +73,9 @@ class _Pelanggan extends State<Pelanggan> {
     if (confirmDelete == true) {
       try {
         await Supabase.instance.client
-            .from('pelanggan')
+            .from('User')
             .delete()
-            .eq('pelangganID', customer['pelangganID']);
+            .eq('Id', customer['Id']);
         setState(() {
           customers.removeAt(index);
         });
@@ -93,13 +90,14 @@ class _Pelanggan extends State<Pelanggan> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 245, 115, 158),
         title: Text(
-          'Llav Florist - Pelanggan',
+          'Llav Florist - User',
           style: GoogleFonts.domine(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
@@ -108,15 +106,13 @@ class _Pelanggan extends State<Pelanggan> {
         child: ListView(
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 249, 144, 179)),
+              decoration: BoxDecoration(color: const Color.fromARGB(255, 249, 144, 179)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(radius: 30),
                   SizedBox(height: 10),
-                  Text('Admin',
-                      style: GoogleFonts.poppins(color: Colors.white)),
+                  Text('Admin', style: GoogleFonts.poppins(color: Colors.white)),
                 ],
               ),
             ),
@@ -133,18 +129,15 @@ class _Pelanggan extends State<Pelanggan> {
             ListTile(
               leading: Icon(Icons.filter_vintage),
               title: Text('User', style: GoogleFonts.poppins()),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Tambahuser()),
-                );
-              },
+              onTap: () {},
             ),
             ListTile(
               leading: Icon(Icons.card_travel),
               title: Text('Member', style: GoogleFonts.poppins()),
               onTap: () {},
+
             ),
+           
           ],
         ),
       ),
@@ -168,8 +161,7 @@ class _Pelanggan extends State<Pelanggan> {
                     children: [
                       Text(
                         customer['NamaPelanggan'],
-                        style: GoogleFonts.poppins(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 4.0),
                       Text(
@@ -182,6 +174,7 @@ class _Pelanggan extends State<Pelanggan> {
                         style: GoogleFonts.poppins(fontSize: 16),
                       ),
                       SizedBox(height: 8.0),
+                     
                     ],
                   ),
                 );
@@ -190,6 +183,7 @@ class _Pelanggan extends State<Pelanggan> {
           ),
         ],
       ),
+    
     );
   }
 }
